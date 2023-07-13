@@ -4,7 +4,8 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>modifyBoard.jsp</title>
+	<title>우리들의 여행지도</title>
+	<link rel="icon" href="/img/favicon.png">
 </head>
 <body>
 	<h1>게시물 수정</h1>

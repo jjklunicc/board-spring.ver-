@@ -4,7 +4,6 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>addBoard.jsp</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 	<script>
 	$(document).ready(function(){
@@ -32,6 +31,8 @@
 		});
 	});
 	</script>
+	<title>우리들의 여행지도</title>
+	<link rel="icon" href="/img/favicon.png">
 </head>
 <body>
 	<h1>게시물 입력</h1>

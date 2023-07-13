@@ -3,7 +3,8 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>deleteBoard.jsp</title>
+	<title>우리들의 여행지도</title>
+	<link rel="icon" href="/img/favicon.png">
 </head>
 <body>
 	<form method="post" action="/board/deleteBoard">
