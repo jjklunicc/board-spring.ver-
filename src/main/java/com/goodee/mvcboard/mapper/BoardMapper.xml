@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.goodee.mvcboard.mapper.BoardMapper">
+	<select id="selectLocalNameList" resultType="java.util.Map">
+		select local_name localName, count(*) cnt
+		from board
+		group by local_name
+	</select>
+	
+	<select id="selectBoardListByPage" parameterType="java.util.Map" resultType="com.goodee.mvcboard.vo.Board">
+		select board_no boardNo, local_name localName, board_title boardTitle, member_id memberId, createdate
+		from board
+		<where>
+			<if test="localName != null">
+			 	local_name = #{localName}
+			</if>
+		</where>
+		order by createdate desc
+		limit #{beginRow}, #{rowPerPage}
+	</select>
+	
+	<select id="selectBoardCount" resultType="int">
+		select count(*) from board
+		<where>
+			<if test="localName != null">
+				local_name = #{localName}
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertBoard" parameterType="com.goodee.mvcboard.vo.Board">
+		<selectKey order="AFTER" keyProperty="boardNo" resultType="int">
+			select last_insert_id()
+		</selectKey>
+		insert into board(
+			local_name,
+			board_title,
+			board_content,
+			member_id,
+			createdate,
+			updatedate
+		) values(
+			#{localName},
+			#{boardTitle},
+			#{boardContent},
+			#{memberId},
+			now(),
+			now()
+		)
+	</insert>
+	
+	<update id="updateBoard" parameterType="com.goodee.mvcboard.vo.Board">
+		update board
+		set board_title = #{boardTitle},
+			board_content = #{boardContent},
+			updatedate = now()
+		where board_no = #{boardNo}
+		and member_id = #{memberId}
+	</update>
+	
+	<delete id="deleteBoard" parameterType="com.goodee.mvcboard.vo.Board">
+		delete from board
+		where board_no = #{boardNo}
+		and member_id = #{memberId}
+	</delete>
+	
+	<select id="selectBoard" parameterType="int">
+		select board_no boardNo, local_name localName, board_title boardTitle, board_content boardContent, member_id memberId, createdate, updatedate
+		from board
+		where board_no = #{boardNo} 
+	</select>
+</mapper>
