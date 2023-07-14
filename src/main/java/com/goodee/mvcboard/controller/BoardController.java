@@ -58,7 +58,7 @@ public class BoardController {
 	@GetMapping("/board/boardOne")
 	public String boardOne(int boardNo, Model model) {
 		Board board = boardService.boardOne(boardNo);
-		List<Boardfile> boardfile = boardService.selectBoardfile(boardNo);
+		List<Boardfile> boardfile = boardService.selectBoardfiles(boardNo);
 		model.addAttribute("board", board);
 		model.addAttribute("boardfile", boardfile);
 		return "/board/boardOne";
@@ -70,6 +70,8 @@ public class BoardController {
 		model.addAttribute("localNameList", localNameList);
 		Board board = boardService.boardOne(boardNo);
 		model.addAttribute("board", board);
+		List<Boardfile> boardfile = boardService.selectBoardfiles(boardNo);
+		model.addAttribute("boardfile", boardfile);
 		return "/board/modifyBoard";
 	}
 	@GetMapping("/board/deleteBoard")
@@ -81,21 +83,31 @@ public class BoardController {
 	
 	@PostMapping("/board/modifyBoard")
 	public String modifyBoard(
-			@RequestParam(name="boardNo") int boardNo,
-			@RequestParam(name="localName") String localName,
-			@RequestParam(name="boardTitle") String boardTitle,
-			@RequestParam(name="boardContent") String boardContent,
-			@RequestParam(name="memberId") String memberId) {
-		Board board = new Board();
-		board.setBoardNo(boardNo);
-		board.setLocalName(localName);
-		board.setBoardTitle(boardTitle);
-		board.setBoardContent(boardContent);
-		board.setMemberId(memberId);
-		
-		int row = boardService.modifyBoard(board);
+			HttpServletRequest request,
+			Board board) {
+		String path = request.getServletContext().getRealPath("/upload/");
+		// 기존 저장된 boardFile이랑 비교해서 없는 boardfileNo가 있으면 deleteOneBoardfile 수행
+		List<Boardfile> boardfile = boardService.selectBoardfiles(board.getBoardNo());
+		System.out.println(board.getBoardfileNo());
+		for(Boardfile bf : boardfile) {
+			boolean isDelete = true;
+			if(board.getBoardfileNo() == null) {
+				boardService.deleteOneBoardfile(bf.getBoardfileNo(), path);
+				continue;
+			}
+			for(int bfNo : board.getBoardfileNo()) {
+				if(bf.getBoardfileNo() == bfNo) {
+					isDelete = false;
+				}
+			}
+			if(isDelete) {
+				boardService.deleteOneBoardfile(bf.getBoardfileNo(), path);
+			}
+		}
+
+		int row = boardService.modifyBoard(board, path);
 		log.debug("\u001B[31m" + "row : " + row + "\u001B[0m");
-		return "redirect:/board/boardOne?boardNo=" + boardNo;
+		return "redirect:/board/boardOne?boardNo=" + board.getBoardNo();
 	}
 	@PostMapping("/board/deleteBoard")
 	public String deleteBoard(

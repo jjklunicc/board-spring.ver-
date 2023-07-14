@@ -17,4 +17,5 @@ public class Board {
 	private String updatedate;
 	
 	List<MultipartFile> multipartFile;
+	List<Integer> boardfileNo;
 }

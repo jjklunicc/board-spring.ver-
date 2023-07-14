@@ -17,12 +17,21 @@
 		)
 	</insert>
 	<select id="selectBoardfile" parameterType="int">
-		select save_filename saveFilename
+		select boardfile_no boardfileNo, save_filename saveFilename
 		from boardfile
 		where board_no = #{boardNo}
 	</select>
-	<delete id="deleteBoardfile" parameterType="int">
+	<delete id="deleteBoardfileByBoard" parameterType="int">
 		delete from boardfile
 		where board_no = #{boardNo}
 	</delete>
+	<delete id="deleteOneBoardfile" parameterType="int">
+		delete from boardfile
+		where boardfile_no = #{boardfileNo}
+	</delete>
+	<select id="selectOneBoardfile" parameterType="int">
+		select board_no boardNo, save_filename saveFilename
+		from boardfile
+		where boardfile_no = #{boardfileNo}
+	</select>
 </mapper>

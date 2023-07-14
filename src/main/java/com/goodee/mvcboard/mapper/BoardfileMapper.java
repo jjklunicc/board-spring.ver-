@@ -10,5 +10,7 @@ import com.goodee.mvcboard.vo.Boardfile;
 public interface BoardfileMapper {
 	int insertBoardfile(Boardfile boardfile);
 	List<Boardfile> selectBoardfile(int boardNo);
-	int deleteBoardfile(int boardNo);
+	int deleteBoardfileByBoard(int boardNo);
+	int deleteOneBoardfile(int boardfileNo);
+	Boardfile selectOneBoardfile(int boardfileNo);
 }

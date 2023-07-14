@@ -26,10 +26,9 @@ public class BoardService {
 	
 	@Autowired
 	private BoardfileMapper boardfileMapper;
-	
+
 	public List<Map<String, Object>> getLocalNameList(){
-		List<Map<String, Object>> localNameList =  boardMapper.selectLocalNameList();
-		return localNameList;
+		return boardMapper.selectLocalNameList();
 	}
 	
 	public Map<String, Object> getBoardList(int currentPage, int rowPerPage, String localName){
@@ -37,7 +36,7 @@ public class BoardService {
 		int beginRow = (currentPage-1) * rowPerPage;
 		
 		// 반환값 1
-		List<Map<String,Object>> localNameList = boardMapper.selectLocalNameList();
+		List<Map<String,Object>> localNameList = getLocalNameList();
 		
 		Map<String,Object> paramMap = new HashMap<>();
 		paramMap.put("beginRow", beginRow);
@@ -105,12 +104,49 @@ public class BoardService {
 		}
 		return row;
 	}
-	public int modifyBoard(Board board) {
+	public int modifyBoard(Board board, String path) {
+		List<MultipartFile> fileList = board.getMultipartFile();
+		if(fileList != null && fileList.size() > 0) {
+			int boardNo = board.getBoardNo();
+			System.out.println("BoardServiece에서 insertBoard한 후 생긴 boardNo : " + boardNo);
+			
+			for(MultipartFile mf : fileList) {
+				if(mf.getSize() > 0) {
+					Boardfile bf = new Boardfile();
+					bf.setBoardNo(boardNo);
+					bf.setOriginFilename(mf.getOriginalFilename());
+					bf.setFilesize(mf.getSize());
+					bf.setFiletype(mf.getContentType());
+					// 저장될 파일이름
+					int lastDot = mf.getOriginalFilename().lastIndexOf(".");
+					String ext = mf.getOriginalFilename().substring(lastDot);
+					// 새로운 이름 + 확장자
+					bf.setSaveFilename(UUID.randomUUID().toString().replace("-", "") + ext);
+					
+					// 테이블에 저장
+					boardfileMapper.insertBoardfile(bf);
+					
+					// 파일저장 (저장위치 - path)
+					File f = new File(path + bf.getSaveFilename());
+					
+					// 빈파일에 첨부된 파일의 스트림을 주입함
+					try {
+						mf.transferTo(f);
+					} catch (IllegalStateException | IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						
+						// try-catch를 강요하지 않는 예외
+						throw new RuntimeException();
+					}
+				}
+			}
+		}
 		return boardMapper.updateBoard(board);
 	}
 	public int deleteBoard(Board board, String path) {
 		int row;
-		List<Boardfile> boardfile = selectBoardfile(board.getBoardNo());
+		List<Boardfile> boardfile = selectBoardfiles(board.getBoardNo());
 		if(boardfile != null) {
 			for(Boardfile bf : boardfile) {
 				File f = new File(path + bf.getSaveFilename());
@@ -118,7 +154,7 @@ public class BoardService {
 					f.delete();
 				}
 			}
-			row = boardfileMapper.deleteBoardfile(board.getBoardNo());
+			row = boardfileMapper.deleteBoardfileByBoard(board.getBoardNo());
 		}
 		row = boardMapper.deleteBoard(board);
 		return row;
@@ -126,7 +162,16 @@ public class BoardService {
 	public Board boardOne(int boardNo) {
 		return boardMapper.selectBoard(boardNo);
 	}
-	public List<Boardfile> selectBoardfile(int boardNo){
+	public List<Boardfile> selectBoardfiles(int boardNo){
 		return boardfileMapper.selectBoardfile(boardNo);
+	}
+	public int deleteOneBoardfile(int boardfileNo, String path) {
+		Boardfile bf = boardfileMapper.selectOneBoardfile(boardfileNo);
+		File f = new File(path + bf.getSaveFilename());
+		if(f.exists()) {
+			f.delete();
+		}
+		int row = boardfileMapper.deleteOneBoardfile(boardfileNo);
+		return row;
 	}
 }
